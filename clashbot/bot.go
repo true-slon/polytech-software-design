@@ -1,13 +1,32 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
+	"os"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
+type Config struct {
+	BotToken string `json:"BotToken"`
+}
+
 func main() {
-	bot, err := tgbotapi.NewBotAPI("8203041820:AAHJjGAfyCzZ6VtvnbD5RXJckxB1ZJfE3qs")
+	file, err := os.Open("config.json")
+	if err != nil {
+		log.Fatalf("Congiguration failed: %s", err)
+	}
+	defer file.Close()
+
+	var cfg Config
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&cfg)
+	if err != nil {
+		log.Fatalf("Decoding failed: %s", err)
+	}
+
+	bot, err := tgbotapi.NewBotAPI(cfg.BotToken)
 	if err != nil {
 		log.Panic(err)
 	}
