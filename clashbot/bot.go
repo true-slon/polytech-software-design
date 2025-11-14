@@ -16,6 +16,7 @@ func main() {
 	var cfg Config
 	cfg.BotToken = os.Getenv("BOT_TOKEN")
 	cfg.ClashApiKey = os.Getenv("API_KEY")
+	fmt.Print("lol")
 
 	bot, err := tgbotapi.NewBotAPI(cfg.BotToken)
 	if err != nil {
