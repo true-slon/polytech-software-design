@@ -26,8 +26,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("Decoding failed: %s", err)
 	}
-
-	bot, err := tgbotapi.NewBotAPI(cfg.BotToken)
+	botToken := os.Getenv("BOT_TOKEN")
+	bot, err := tgbotapi.NewBotAPI(botToken)
 	if err != nil {
 		log.Panic(err)
 	}
