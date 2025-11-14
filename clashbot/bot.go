@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -13,11 +12,6 @@ import (
 )
 
 func main() {
-	var cfg Config
-	cfg.BotToken = os.Getenv("BOT_TOKEN")
-	cfg.ClashApiKey = os.Getenv("API_KEY")
-
-	bot, err := tgbotapi.NewBotAPI(cfg.BotToken)
 	if err != nil {
 		log.Panic(err)
 	}
