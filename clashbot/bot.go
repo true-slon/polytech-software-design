@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 
@@ -45,6 +46,7 @@ func main() {
 			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+			fmt.Println("lol")
 			msg.ReplyToMessageID = update.Message.MessageID
 
 			bot.Send(msg)
