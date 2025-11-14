@@ -13,18 +13,9 @@ import (
 )
 
 func main() {
-	file, err := os.Open("config.json")
-	if err != nil {
-		log.Fatalf("Congiguration failed: %s", err)
-	}
-	defer file.Close()
-
 	var cfg Config
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&cfg)
-	if err != nil {
-		log.Fatalf("Decoding failed: %s", err)
-	}
+	cfg.BotToken = os.Getenv("BOT_TOKEN")
+	cfg.ClashApiKey = os.Getenv("API_KEY")
 
 	bot, err := tgbotapi.NewBotAPI(cfg.BotToken)
 	if err != nil {
