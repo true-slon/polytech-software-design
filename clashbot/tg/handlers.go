@@ -2,15 +2,17 @@ package tg
 
 import (
 	"fmt"
+	"strconv"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 func (b *Bot) initHandlers() map[string]func(*tgbotapi.Message) {
 	return map[string]func(*tgbotapi.Message){
-		"start":  b.handleStart,
-		"player": b.handlePlayer,
-		"clan":   b.handleClan,
+		"start":     b.handleStart,
+		"player":    b.handlePlayer,
+		"clan":      b.handleClan,
+		"battlelog": b.handleBattleLog,
 	}
 }
 
@@ -71,6 +73,26 @@ func (b *Bot) handleClan(msg *tgbotapi.Message) {
 	)
 
 	b.reply(msg.Chat.ID, text)
+}
+
+func (b *Bot) handleBattleLog(msg *tgbotapi.Message) {
+	tag := msg.CommandArguments()
+	if tag == "" {
+		b.reply(msg.Chat.ID, "тег бро")
+		return
+	}
+
+	battleLog, err := b.service.GetBattleLog(tag)
+	if err != nil {
+		b.reply(msg.Chat.ID, err.Error())
+		return
+	}
+
+	trophiesChange := 0
+	for _, battle := range *battleLog {
+		trophiesChange += battle.Team[0].TrophyChange
+	}
+	b.reply(msg.Chat.ID, "Бро... "+strconv.Itoa(trophiesChange))
 }
 
 func (b *Bot) handleUnknown(msg *tgbotapi.Message) {

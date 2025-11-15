@@ -70,3 +70,17 @@ func (c *Client) GetClan(tag string) (*Clan, error) {
 
 	return &clan, nil
 }
+
+func (c *Client) GetBattleLog(tag string) (*BattleList, error) {
+	if strings.HasPrefix(tag, "#") {
+		tag = strings.TrimPrefix(tag, "#")
+	}
+
+	var battleList BattleList
+	err := c.get("/players/%23"+tag+"/battlelog", &battleList)
+	if err != nil {
+		return nil, err
+	}
+
+	return &battleList, nil
+}

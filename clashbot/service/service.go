@@ -17,3 +17,7 @@ func (s *Service) GetPlayer(tag string) (*cr.Player, error) {
 func (s *Service) GetClan(tag string) (*cr.Clan, error) {
 	return s.cr.GetClan(tag)
 }
+
+func (s *Service) GetBattleLog(tag string) (*cr.BattleList, error) {
+	return s.cr.GetBattleLog(tag)
+}
