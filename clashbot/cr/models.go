@@ -1,9 +1,4 @@
-package main
-
-type Config struct {
-	BotToken    string
-	ClashApiKey string
-}
+package cr
 
 type Player struct {
 	Tag                             string                   `json:"tag"`
@@ -46,9 +41,16 @@ type Player struct {
 }
 
 type Clan struct {
-	Tag     string `json:"tag"`
-	Name    string `json:"name"`
-	BadgeID int64  `json:"badgeId"`
+	Tag              string   `json:"tag"`
+	ClanScore        int      `json:"clanScore,omitempty"`
+	ClanWarTrophies  int      `json:"clanWarTrophies,omitempty"`
+	RequiredTrophies *int     `json:"requiredTrophies,omitempty"`
+	DonationsPerWeek int      `json:"donationsPerWeek,omitempty"`
+	BadgeId          int      `json:"badgeId"`
+	Name             string   `json:"name"`
+	Location         Location `json:"location,omitempty"`
+	Members          int      `json:"members,omitempty"`
+	Description      string   `json:"description,omitempty"`
 }
 
 type Arena struct {
@@ -128,4 +130,72 @@ type IconUrls struct {
 	Medium          string `json:"medium,omitempty"`
 	Small           string `json:"small,omitempty"`
 	EvolutionMedium string `json:"evolutionMedium,omitempty"`
+}
+
+type Location struct {
+	LocalizedName string `json:"localizedName"`
+	ID            int    `json:"id"`
+	Name          string `json:"name"`
+	IsCountry     bool   `json:"isCountry"`
+	CountryCode   string `json:"countryCode"`
+}
+
+type BattleList []Battle
+
+type Battle struct {
+	GameMode                GameMode           `json:"gameMode"`
+	Arena                   Arena              `json:"arena"`
+	DeckSelection           string             `json:"deckSelection"`
+	Team                    []PlayerBattleData `json:"team"`
+	Opponent                []PlayerBattleData `json:"opponent"`
+	ChallengeWinCountBefore int                `json:"challengeWinCountBefore"`
+	BoatBattleSide          string             `json:"boatBattleSide"`
+	BoatBattleWon           bool               `json:"boatBattleWon"`
+	NewTowersDestroyed      int                `json:"newTowersDestroyed"`
+	PrevTowersDestroyed     int                `json:"prevTowersDestroyed"`
+	RemainingTowers         int                `json:"remainingTowers"`
+	Type                    string             `json:"type"`
+	LeagueNumber            int                `json:"leagueNumber"`
+	BattleTime              string             `json:"battleTime"`
+	ChallengeID             int                `json:"challengeId"`
+	TournamentTag           string             `json:"tournamentTag"`
+	ChallengeTitle          string             `json:"challengeTitle"`
+	IsLadderTournament      bool               `json:"isLadderTournament"`
+	IsHostedMatch           bool               `json:"isHostedMatch"`
+	EventTag                string             `json:"eventTag"`
+}
+
+type GameMode struct {
+	ID   int    `json:"id,omitempty"`
+	Name string `json:"name,omitempty"`
+}
+
+type PlayerBattleData struct {
+	ElixirLeaked            float64             `json:"elixirLeaked"`
+	GlobalRank              int                 `json:"globalRank"`
+	Rounds                  []PlayerBattleRound `json:"rounds"`
+	Clan                    Clan                `json:"clan"`
+	Cards                   []Card              `json:"cards"`
+	SupportCards            []Card              `json:"supportCards"`
+	Crowns                  int                 `json:"crowns"`
+	PrincessTowersHitPoints []int               `json:"princessTowersHitPoints"`
+	Tag                     string              `json:"tag"`
+	Name                    string              `json:"name"`
+	StartingTrophies        int                 `json:"startingTrophies"`
+	TrophyChange            int                 `json:"trophyChange"`
+	KingTowerHitPoints      int                 `json:"kingTowerHitPoints"`
+}
+
+type PlayerBattleRound struct {
+	ElixirLeaked            float64 `json:"elixirLeaked"`
+	Cards                   []Card  `json:"cards"`
+	Crowns                  int     `json:"crowns"`
+	KingTowerHitPoints      int     `json:"kingTowerHitPoints"`
+	PrincessTowersHitPoints []int   `json:"princessTowersHitPoints"`
+}
+
+type ClientError struct {
+	Reason  string `json:"reason"`
+	Message string `json:"message"`
+	Type    string `json:"type"`
 }
