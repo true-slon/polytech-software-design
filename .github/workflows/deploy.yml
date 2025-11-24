@@ -17,6 +17,7 @@ jobs:
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.VPS_KEY }}
         script: |
+          set -e
           cd /home/polytech-software-design
           git pull origin main
           docker compose -f /opt/docker/docker-compose.yml down
