@@ -26,7 +26,7 @@ func main() {
 
 	bot := tg.NewBot(cfg.BotToken, svc)
 
-	if err := bot.Run(); err != nil {
-		log.Fatal(err)
+	if err := bot.Run(cfg.WebAppUrl, cfg.Port); err != nil {
+		log.Fatalf("Bot run failed: %v", err)
 	}
 }

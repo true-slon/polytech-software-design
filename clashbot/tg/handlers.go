@@ -7,15 +7,6 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func (b *Bot) initHandlers() map[string]func(*tgbotapi.Message) {
-	return map[string]func(*tgbotapi.Message){
-		"start":     b.handleStart,
-		"player":    b.handlePlayer,
-		"clan":      b.handleClan,
-		"battlelog": b.handleBattleLog,
-	}
-}
-
 func (b *Bot) reply(chatID int64, text string) {
 	msg := tgbotapi.NewMessage(chatID, text)
 	b.api.Send(msg)
