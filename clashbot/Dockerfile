@@ -5,8 +5,10 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY *.go ./
-COPY tg/ ./tg/
+COPY config/ ./config/
+COPY cr/ ./cr/
 COPY service/ ./service/
+COPY tg/ ./tg/
 COPY config.json ./
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o main .
