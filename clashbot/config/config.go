@@ -17,7 +17,7 @@ func Load() (*Config, error) {
 		BotToken:    os.Getenv("BOT_TOKEN"),
 		ClashApiKey: os.Getenv("API_KEY"),
 		WebAppUrl:   os.Getenv("WEBAPP_URL"),
-		Port:        os.Getenv("PORT"),
+		Port:        os.Getenv("WH_PORT"),
 	}
 
 	if cfg.BotToken == "" {
