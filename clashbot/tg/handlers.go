@@ -3,7 +3,8 @@ package tg
 import (
 	"fmt"
 	"strconv"
-
+	"log"
+	"time"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -22,7 +23,22 @@ func (b *Bot) reply(chatID int64, text string) {
 }
 
 func (b *Bot) handleStart(msg *tgbotapi.Message) {
+	b.addUserIfNotExists(msg.From)
 	b.reply(msg.Chat.ID, "Пиши\n/player #TAG\n/clan #TAG\nзаебал")
+}
+
+func (b *Bot) addUserIfNotExists(user *tgbotapi.User) {
+
+_, err := b.db.Exec(
+		`INSERT INTO Telegram_users(id, first_name, username, date) VALUES($1, $2, $3, $4)`, 
+		user.ID,
+		user.FirstName,
+		user.UserName,
+		time.Now().Unix(),
+	)
+	if err != nil {
+		log.Printf("Error adding user: %v", err)
+	}
 }
 
 func (b *Bot) handlePlayer(msg *tgbotapi.Message) {
@@ -96,5 +112,5 @@ func (b *Bot) handleBattleLog(msg *tgbotapi.Message) {
 }
 
 func (b *Bot) handleUnknown(msg *tgbotapi.Message) {
-	b.reply(msg.Chat.ID, "Иди нахуй")
+	b.reply(msg.Chat.ID, "да")
 }
