@@ -8,12 +8,20 @@ import (
 type Config struct {
 	BotToken    string
 	ClashApiKey string
+	DatabasePassword string
+	DatabaseUser string
+	DatabaseName string
+	DatabasePort string
 }
 
 func Load() (*Config, error) {
 	cfg := &Config{
 		BotToken:    os.Getenv("BOT_TOKEN"),
-		ClashApiKey: os.Getenv("API_KEY"),
+		ClashApiKey: os.Getenv("CLASH_API_KEY"),
+		DatabasePassword: os.Getenv("DB_PASSWORD"),
+		DatabaseUser: os.Getenv("DB_USER"),
+		DatabaseName: os.Getenv("DB_NAME"),
+		DatabasePort: os.Getenv("DB_EXTERNAL_PORT"),
 	}
 
 	if cfg.BotToken == "" {
