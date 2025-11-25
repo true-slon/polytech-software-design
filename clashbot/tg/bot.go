@@ -28,18 +28,6 @@ func NewBot(token string, service *service.Service) *Bot {
 }
 
 func (b *Bot) Run(url string, port string) error {
-	// u := tgbotapi.NewUpdate(0)
-	// u.Timeout = 60
-
-	// b.api.Debug = true
-
-	// updates := b.api.GetUpdatesChan(u)
-
-	// b.initHandlers()
-	// if err := b.initMenu(url); err != nil {
-	// 	return (err)
-	// }
-
 	b.api.Debug = true
 
 	b.initHandlers()
@@ -50,11 +38,12 @@ func (b *Bot) Run(url string, port string) error {
 	if port == "" {
 		port = "8080"
 	}
-	go func() {
+	go func() error {
 		err := http.ListenAndServe(":"+port, nil)
 		if err != nil {
-			log.Fatalf("Server failed: %v", err)
+			return err
 		}
+		return nil
 	}()
 
 	wh, err := tgbotapi.NewWebhook(url + "/wh")
