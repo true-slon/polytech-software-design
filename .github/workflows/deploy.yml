@@ -1,0 +1,24 @@
+name: fattest pipe ive ever seen
+on:
+  push:
+    branches: [ main ]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Deploy
+      uses: appleboy/ssh-action@v0.1.6
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_KEY }}
+        script: |
+          set -e
+          cd /home/polytech-software-design
+          git pull origin main
+          docker compose -f /opt/docker/docker-compose.yml down
+          docker compose -f /opt/docker/docker-compose.yml up -d --build
