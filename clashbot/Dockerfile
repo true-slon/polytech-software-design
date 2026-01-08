@@ -1,10 +1,16 @@
 FROM golang:1.21-alpine AS builder
 WORKDIR /app
 
-COPY clashbot/go.mod clashbot/go.sum ./
+
+COPY go.mod go.sum ./
 RUN go mod download
 
-COPY clashbot/ .
+COPY *.go ./
+COPY config/ ./config/
+COPY cr/ ./cr/
+COPY service/ ./service/
+COPY tg/ ./tg/
+COPY config.json ./
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 

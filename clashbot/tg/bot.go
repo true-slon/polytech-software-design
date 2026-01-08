@@ -2,6 +2,7 @@ package tg
 
 import (
 	"log"
+	"net/http"
 
 	"clashbot/service"
 
@@ -9,8 +10,9 @@ import (
 )
 
 type Bot struct {
-	api     *tgbotapi.BotAPI
-	service *service.Service
+	api      *tgbotapi.BotAPI
+	service  *service.Service
+	handlers map[string]func(*tgbotapi.Message)
 }
 
 func NewBot(token string, service *service.Service) *Bot {
@@ -25,15 +27,39 @@ func NewBot(token string, service *service.Service) *Bot {
 	}
 }
 
-func (b *Bot) Run() error {
-	u := tgbotapi.NewUpdate(0)
-	u.Timeout = 60
-
-	updates := b.api.GetUpdatesChan(u)
-
-	handlers := b.initHandlers()
-
+func (b *Bot) Run(url string, port string) error {
 	b.api.Debug = true
+
+	b.initHandlers()
+
+	_, _ = b.api.Request(tgbotapi.DeleteWebhookConfig{DropPendingUpdates: true})
+	updates := b.api.ListenForWebhook("/wh")
+
+	if port == "" {
+		port = "8080"
+	}
+	go func() error {
+		err := http.ListenAndServe(":"+port, nil)
+		if err != nil {
+			return err
+		}
+		return nil
+	}()
+
+	wh, err := tgbotapi.NewWebhook(url + "/wh")
+
+	if err != nil {
+		return (err)
+	}
+
+	_, err = b.api.Request(wh)
+	if err != nil {
+		return (err)
+	}
+
+	if err := b.initMenu(url); err != nil {
+		return (err)
+	}
 
 	for update := range updates {
 		if update.Message == nil {
@@ -42,12 +68,36 @@ func (b *Bot) Run() error {
 
 		cmd := update.Message.Command()
 
-		if h, ok := handlers[cmd]; ok {
+		if h, ok := b.handlers[cmd]; ok {
 			h(update.Message)
 		} else {
 			b.handleUnknown(update.Message)
 		}
 	}
 
+	return nil
+}
+
+func (b *Bot) initHandlers() {
+	b.handlers = map[string]func(*tgbotapi.Message){
+		"start":     b.handleStart,
+		"player":    b.handlePlayer,
+		"clan":      b.handleClan,
+		"battlelog": b.handleBattleLog,
+	}
+}
+
+func (b *Bot) initMenu(url string) error {
+	menu := &tgbotapi.MenuButton{
+		Type:   "web_app",
+		Text:   "Open",
+		WebApp: &tgbotapi.WebAppInfo{URL: url},
+	}
+
+	_, err := b.api.Request(tgbotapi.SetChatMenuButtonConfig{MenuButton: menu})
+
+	if err != nil {
+		return (err)
+	}
 	return nil
 }
