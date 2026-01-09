@@ -54,18 +54,3 @@ func (b *Bot) Run() error {
 	}
 	return nil
 }
-func (b *Bot) initMenu(url string) error {
-	// menu := &tgbotapi.MenuButton{
-	// 	Type:   "web_app",
-	// 	Text:   "Open",
-	// 	WebApp: &tgbotapi.WebAppInfo{URL: url},
-	// }
-
-	// _, err := b.api.Request(tgbotapi.SetChatMenuButtonConfig{MenuButton: menu})
-
-	// if err != nil {
-	// 	return (err)
-	// }
-	// return nil
-	return nil
-}

@@ -12,7 +12,6 @@ type Config struct {
 	DatabaseUser     string
 	DatabaseName     string
 	DatabasePort     string
-	WebAppUrl        string
 }
 
 func Load() (*Config, error) {
@@ -23,7 +22,6 @@ func Load() (*Config, error) {
 		DatabaseUser:     os.Getenv("DB_USER"),
 		DatabaseName:     os.Getenv("DB_NAME"),
 		DatabasePort:     os.Getenv("DB_EXTERNAL_PORT"),
-		WebAppUrl:        os.Getenv("WEBAPP_URL"),
 	}
 
 	if cfg.BotToken == "" {
@@ -31,9 +29,6 @@ func Load() (*Config, error) {
 	}
 	if cfg.ClashApiKey == "" {
 		return nil, errors.New("Missing clash key")
-	}
-	if cfg.WebAppUrl == "" {
-		return nil, errors.New("Missing webapp url")
 	}
 
 	return cfg, nil
