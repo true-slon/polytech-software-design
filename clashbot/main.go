@@ -36,6 +36,11 @@ func main() {
 		log.Fatal("DB ping failed:", err)
 	}
 
+	db, err := sql.Open("pgx", connStr)
+	if err != nil {
+		log.Fatal("error connection:", err)
+	}
+	defer db.Close()	
 	crClient := cr.NewClient(cfg.ClashApiKey)
 	svc := service.NewService(crClient)
 
