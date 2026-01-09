@@ -1,0 +1,54 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:14.7
+    restart: unless-stopped
+    env_file: .env 
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_SCHEMA: ${DB_SCHEMA}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./db/init:/docker-entrypoint-initdb.d
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "${DB_EXTERNAL_PORT}"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+  
+  backend:
+    image: bot:latest
+    restart: unless-stopped
+    user: "0:0"
+    env_file: .env  
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      API_DB_HOST: ${API_DB_HOST}
+      API_DB_PORT: ${API_DB_PORT}
+      API_DB_NAME: ${DB_NAME}
+      API_DB_SCHEMA: ${DB_SCHEMA}
+      API_DB_USERNAME: ${DB_USER}
+      API_DB_PASSWORD: ${DB_PASSWORD}
+      BOT_TOKEN: ${BOT_TOKEN}
+      FILE_DIR: ${FILE_DIR:-/workspace/files}
+      CLASH_API_KEY: ${CLASH_API_KEY} 
+    volumes:
+      - ./data/logs:/workspace/logs  
+      - ./files:/workspace/files 
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    ports:
+      - "${API_EXTERNAL_PORT}:${API_PORT}"
+    depends_on:
+      db:
+        condition: service_healthy 
+
+volumes:
+  postgres-data: 
