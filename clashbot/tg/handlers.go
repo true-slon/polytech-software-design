@@ -86,6 +86,30 @@ func (b *Bot) handleBattleLog(msg *tgbotapi.Message) {
 	b.reply(msg.Chat.ID, "Бро... "+strconv.Itoa(trophiesChange))
 }
 
+func (b *Bot) handleCardStats(msg *tgbotapi.Message) {
+	tag := msg.CommandArguments()
+	if tag == "" {
+		b.reply(msg.Chat.ID, "тег бро")
+		return
+	}
+
+	cardsStat, err := b.service.GetCardStats(tag)
+	if err != nil {
+		b.reply(msg.Chat.ID, err.Error())
+		return
+	}
+
+	text := fmt.Sprintf(
+		"Худший противник: %s(WR:%f)\nЧасто встречается: %s(WR:%f)",
+		cardsStat.WorstCard.Card.Name,
+		cardsStat.WorstCard.Winrate*100,
+		cardsStat.FrequentCard.Card.Name,
+		cardsStat.FrequentCard.Winrate*100,
+	)
+
+	b.reply(msg.Chat.ID, text)
+}
+
 func (b *Bot) handleUnknown(msg *tgbotapi.Message) {
 	b.reply(msg.Chat.ID, "Иди нахуй")
 }

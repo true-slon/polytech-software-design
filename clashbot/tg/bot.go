@@ -84,6 +84,7 @@ func (b *Bot) initHandlers() {
 		"player":    b.handlePlayer,
 		"clan":      b.handleClan,
 		"battlelog": b.handleBattleLog,
+		"cardstat":  b.handleCardStats,
 	}
 }
 
