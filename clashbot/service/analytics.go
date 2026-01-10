@@ -5,20 +5,6 @@ import (
 	"errors"
 )
 
-type CardStats struct {
-	Card    cr.Card
-	Wins    int
-	Losses  int
-	Winrate float64
-}
-
-type RecentCards struct {
-	Cards        []CardStats
-	BestCard     CardStats
-	WorstCard    CardStats
-	FrequentCard CardStats
-}
-
 func (s *Service) GetCardStats(tag string) (*RecentCards, error) {
 	battleLog, err := s.cr.GetBattleLog(tag)
 	if err != nil {
