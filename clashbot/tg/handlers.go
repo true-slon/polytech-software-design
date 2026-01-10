@@ -2,9 +2,10 @@ package tg
 
 import (
 	"fmt"
-	"strconv"
 	"log"
+	"strconv"
 	"time"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -14,7 +15,7 @@ func (b *Bot) initHandlers() map[string]func(*tgbotapi.Message) {
 		"player":    b.handlePlayer,
 		"clan":      b.handleClan,
 		"battlelog": b.handleBattleLog,
-		"admin": b.handleAdmin,
+		"admin":     b.handleAdmin,
 	}
 }
 
@@ -28,15 +29,15 @@ func (b *Bot) handleStart(msg *tgbotapi.Message) {
 	b.reply(msg.Chat.ID, "Пиши\n/player #TAG\n/clan #TAG\nзаебал")
 }
 func (b *Bot) handleAdmin(msg *tgbotapi.Message) {
-	var res bool;
-	  err := b.db.QueryRow(
-        "SELECT EXISTS(SELECT 1 FROM Telegram_users WHERE id = $1 and is_admin = $2)",
-        msg.From.ID,
+	var res bool
+	err := b.db.QueryRow(
+		"SELECT EXISTS(SELECT 1 FROM clashbot.Telegram_users WHERE id = $1 and is_admin = $2)",
+		msg.From.ID,
 		true,
-    ).Scan(&res)
-    if err != nil {
+	).Scan(&res)
+	if err != nil {
 		log.Printf("Error select: %v", err)
-	
+
 	}
 	if res == true {
 		b.reply(msg.Chat.ID, "да ты пиздец ахуевший")
@@ -45,9 +46,8 @@ func (b *Bot) handleAdmin(msg *tgbotapi.Message) {
 	}
 }
 func (b *Bot) addUserIfNotExists(user *tgbotapi.User) {
-
-_, err := b.db.Exec(
-		`INSERT INTO Telegram_users(id, first_name, username, date) VALUES($1, $2, $3, $4)`, 
+	_, err := b.db.Exec(
+		`INSERT INTO clashbot.Telegram_users(id, first_name, username, date) VALUES($1, $2, $3, $4)`,
 		user.ID,
 		user.FirstName,
 		user.UserName,
