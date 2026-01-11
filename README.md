@@ -45,8 +45,10 @@ Clashroyale - стратегическая игра с миллионами ак
 
 ![Структура БД](https://github.com/user-attachments/assets/00c1573b-f7db-4eda-ad61-d9274280fb7a)
 <center><em>Рисунок 1: Структура базы данных</em></center>
+
 ![Диаграмма контекста](https://github.com/user-attachments/assets/67fc7027-0548-4ca9-b7e6-79b1945f9566)
 <center><em>Рисунок 2: Диаграмма контекста</em></center>
+
 ![Диаграмма контейнеров](https://github.com/user-attachments/assets/38e6ec34-470b-47a5-a009-4a63671635a1)
 <center><em>Рисунок 3: Диаграмма контейнеров</em></center>
 
