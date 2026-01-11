@@ -74,8 +74,5 @@ Clashroyale - стратегическая игра с миллионами ак
 
 ## 6. Интеграционное тестирование
 
----
-
 ## 7. Сборка
-
-docker compose up --build
+- docker-compose up --build
