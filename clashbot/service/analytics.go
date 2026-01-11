@@ -6,7 +6,7 @@ import (
 )
 
 func (s *Service) GetCardStats(tag string) (*RecentCards, error) {
-	battleLog, err := s.cr.GetBattleLog(tag)
+	battleLog, err := s.Cr.GetBattleLog(tag)
 	if err != nil {
 		return nil, err
 	}

@@ -66,18 +66,19 @@ func (b *Bot) handleStart(msg *tgbotapi.Message) {
 		b.reply(msg.Chat.ID, "Привет! Для начала отправь мне свой тег Clash Royale (например, #ABC123).")
 		b.awaitingTag[msg.Chat.ID] = true
 	} else {
-		b.reply(msg.Chat.ID, "Привет! Твой сохраненный тег: #"+tag+"\n\nКоманды:\n/player - информация об игроке\n/clan - информация о клане\n/battlelog - статистика боёв\n/cardstat - статистика карт\n/settag - изменить тег")
+		b.reply(msg.Chat.ID, "Привет! Твой сохраненный тег: #"+tag+"\n\nКоманды:\n/player - информация об игроке\n/clan #ТЕГ - информация о клане (укажи тег клана)\n/battlelog - статистика боёв\n/cardstat - статистика карт\n/settag - изменить тег")
 	}
 }
 
 func (b *Bot) processTagInput(msg *tgbotapi.Message) {
-	delete(b.awaitingTag, msg.Chat.ID)
-
 	tag := strings.TrimSpace(msg.Text)
+
 	if tag == "" {
-		b.reply(msg.Chat.ID, "Тег не может быть пустым.")
+		b.reply(msg.Chat.ID, "Тег не может быть пустым. Отправь мне свой тег Clash Royale (например, #ABC123).")
 		return
 	}
+
+	delete(b.awaitingTag, msg.Chat.ID)
 
 	if !strings.HasPrefix(tag, "#") {
 		tag = "#" + tag
@@ -85,12 +86,13 @@ func (b *Bot) processTagInput(msg *tgbotapi.Message) {
 
 	err := b.saveClashTag(msg.From.ID, tag)
 	if err != nil {
-		b.reply(msg.Chat.ID, "Ошибка сохранения тега.")
+		b.reply(msg.Chat.ID, "Ошибка сохранения тега. Попробуй еще раз.")
 		log.Printf("Error saving tag: %v", err)
+		b.awaitingTag[msg.Chat.ID] = true
 		return
 	}
 
-	b.reply(msg.Chat.ID, "Тег "+tag+" сохранён!\n\nКоманды:\n/player - информация об игроке\n/clan - информация о клане\n/battlelog - статистика боёв\n/cardstat - статистика карт\n/settag - изменить тег")
+	b.reply(msg.Chat.ID, "Тег "+tag+" сохранён!\n\nКоманды:\n/player - информация об игроке\n/clan #ТЕГ - информация о клане (укажи тег клана)\n/battlelog - статистика боёв\n/cardstat - статистика карт\n/settag - изменить тег")
 }
 
 func (b *Bot) handleSetTag(msg *tgbotapi.Message) {
@@ -144,22 +146,24 @@ func (b *Bot) handlePlayer(msg *tgbotapi.Message) {
 func (b *Bot) handleClan(msg *tgbotapi.Message) {
 	tag := msg.CommandArguments()
 
+	// ВАЖНО: Убираем проверку на сохраненный тег!
+	// Команда /clan всегда требует явного указания тега клана
 	if tag == "" {
-		savedTag, err := b.getClashTag(msg.From.ID)
-		if err != nil || savedTag == "" {
-			b.reply(msg.Chat.ID, "У тебя нет сохраненного тега. Используй /start или укажи тег: /clan #TAG")
-			return
-		}
-		tag = savedTag
-	} else if !strings.HasPrefix(tag, "#") {
+		b.reply(msg.Chat.ID, "Укажи тег клана для поиска: /clan #ТЕГ_КЛАНА\n\nТы можешь найти тег клана в игре в описании клана.")
+		return
+	}
+
+	if !strings.HasPrefix(tag, "#") {
 		tag = "#" + tag
 	}
 
 	clan, err := b.service.GetClan(tag)
 	if err != nil {
-		b.reply(msg.Chat.ID, err.Error())
+		b.reply(msg.Chat.ID, "Не удалось найти клан. Проверь правильность тега.")
+		log.Printf("Error getting clan for tag %s: %v", tag, err)
 		return
 	}
+
 	text := fmt.Sprintf(
 		"Название: %s\nКубки: %d\nСтрана: %s\nОчко войны: %d\nУчастников: %d\nОписание: %s",
 		clan.Name,
