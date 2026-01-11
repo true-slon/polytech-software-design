@@ -55,31 +55,8 @@ func (c *Client) makeRequest(endpoint string, v interface{}) error {
 	return json.NewDecoder(resp.Body).Decode(v)
 }
 
-// func (c *Client) get(endpoint string, v interface{}) error {
-// 	req, err := http.NewRequest("GET", c.baseURL+endpoint, nil)
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	req.Header.Set("Authorization", "Bearer "+c.token)
-
-// 	resp, err := c.http.Do(req)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	defer resp.Body.Close()
-
-// 	if resp.StatusCode >= 300 {
-// 		return fmt.Errorf("API error: %s", resp.Status)
-// 	}
-
-// 	return json.NewDecoder(resp.Body).Decode(v)
-// }
-
 func (c *Client) GetPlayer(tag string) (*Player, error) {
-	if strings.HasPrefix(tag, "#") {
-		tag = strings.TrimPrefix(tag, "#")
-	}
+	tag = strings.TrimPrefix(tag, "#")
 
 	var player Player
 	err := c.get("/players/%23"+tag, &player)
@@ -91,9 +68,7 @@ func (c *Client) GetPlayer(tag string) (*Player, error) {
 }
 
 func (c *Client) GetClan(tag string) (*Clan, error) {
-	if strings.HasPrefix(tag, "#") {
-		tag = strings.TrimPrefix(tag, "#")
-	}
+	tag = strings.TrimPrefix(tag, "#")
 
 	var clan Clan
 	err := c.get("/clans/%23"+tag, &clan)
@@ -105,9 +80,7 @@ func (c *Client) GetClan(tag string) (*Clan, error) {
 }
 
 func (c *Client) GetBattleLog(tag string) (*BattleList, error) {
-	if strings.HasPrefix(tag, "#") {
-		tag = strings.TrimPrefix(tag, "#")
-	}
+	tag = strings.TrimPrefix(tag, "#")
 
 	var battleList BattleList
 	err := c.get("/players/%23"+tag+"/battlelog", &battleList)

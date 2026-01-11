@@ -14,12 +14,12 @@ func (b *Bot) reply(chatID int64, text string) {
 func (b *Bot) sendMainMenu(chatID int64) {
 	keyboard := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("👤 Player", "player"),
-			tgbotapi.NewInlineKeyboardButtonData("🏰 Clan", "clan"),
+			tgbotapi.NewInlineKeyboardButtonData("👤 Игрок", "player"),
+			tgbotapi.NewInlineKeyboardButtonData("🏰 Клан", "clan"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("⚔ Battle log", "battlelog"),
-			tgbotapi.NewInlineKeyboardButtonData("🃏 Card stats", "cardstat"),
+			tgbotapi.NewInlineKeyboardButtonData("⚔ Последние бои", "battlelog"),
+			tgbotapi.NewInlineKeyboardButtonData("🃏 Статистика карт", "cardstat"),
 		),
 	)
 
@@ -29,12 +29,12 @@ func (b *Bot) sendMainMenu(chatID int64) {
 }
 
 func (b *Bot) handleStart(msg *tgbotapi.Message) {
-	b.reply(msg.Chat.ID, "Пиши\n/player #TAG\n/clan #TAG\nзаебал")
+	b.sendMainMenu(msg.Chat.ID)
 }
 
 func (b *Bot) handlePlayer(msg *tgbotapi.Message, tag string) {
 	if tag == "" {
-		b.reply(msg.Chat.ID, "тег бро")
+		b.reply(msg.Chat.ID, "Пожалуйста, введите тег игрока.")
 		return
 	}
 
@@ -45,11 +45,17 @@ func (b *Bot) handlePlayer(msg *tgbotapi.Message, tag string) {
 	}
 
 	text := fmt.Sprintf(
-		"Имя: %s\nКубки: %d\nАренa: %s\nЛюбимая карта: %s",
+		"Имя: %s\nКубки: %d\nАренa: %s\nУровень: %d\nВсего игр: %d\nПобед: %d\nТри короны: %d\nПроцент побед: %.2f\nЛюбимая карта: %s\nКоличество пожертвованных карт: %d",
 		player.Name,
 		player.Trophies,
 		player.Arena.Name,
+		player.ExpLevel,
+		player.BattleCount,
+		player.Wins,
+		player.ThreeCrownWins,
+		float64(player.Wins)/float64(player.BattleCount)*100,
 		player.CurrentFavouriteCard.Name,
+		player.TotalDonations,
 	)
 
 	b.reply(msg.Chat.ID, text)
@@ -61,39 +67,26 @@ func (b *Bot) handlePlayer(msg *tgbotapi.Message, tag string) {
 		return
 	}
 
+	elixirCost := 0
 	var cardNames []string
 	for _, card := range player.CurrentDeck {
 		cardNames = append(cardNames, card.Name)
+		elixirCost += card.ElixirCost
 	}
 
-	deckText := "Текущая колода:\n" + fmt.Sprintf("%s", cardNames)
+	deckText := "Текущая колода:\n"
+	for _, name := range cardNames {
+		deckText += name + "\n"
+	}
+
+	deckText += fmt.Sprintf("Средняя стоимость эликсира: %.2f", float64(elixirCost)/float64(len(player.CurrentDeck)))
+
 	b.reply(msg.Chat.ID, deckText)
-
-	// var urls []string
-	// for _, card := range player.CurrentDeck {
-	// 	urls = append(urls, card.IconUrls.Medium)
-	// }
-
-	// collage, err := image.BuildDeckCollage(urls)
-	// if err != nil {
-	// 	b.reply(msg.Chat.ID, err.Error())
-	// 	return
-	// }
-
-	// photo := tgbotapi.NewPhoto(
-	// 	msg.Chat.ID,
-	// 	tgbotapi.FileBytes{
-	// 		Name:  "deck.jpg",
-	// 		Bytes: collage.Bytes(),
-	// 	},
-	// )
-
-	// b.api.Send(photo)
 }
 
 func (b *Bot) handleClan(msg *tgbotapi.Message, tag string) {
 	if tag == "" {
-		b.reply(msg.Chat.ID, "тег бро")
+		b.reply(msg.Chat.ID, "Пожалуйста, введите тег клана.")
 		return
 	}
 
@@ -118,7 +111,7 @@ func (b *Bot) handleClan(msg *tgbotapi.Message, tag string) {
 
 func (b *Bot) handleBattleLog(msg *tgbotapi.Message, tag string) {
 	if tag == "" {
-		b.reply(msg.Chat.ID, "тег бро")
+		b.reply(msg.Chat.ID, "Пожалуйста, введите тег игрока.")
 		return
 	}
 
@@ -149,7 +142,7 @@ func (b *Bot) handleBattleLog(msg *tgbotapi.Message, tag string) {
 	}
 
 	text := fmt.Sprintf(
-		"Всего боёв: %d\nПобед: %d\nПоражений: %d\nПроцент побед: %f\nИзменение кубков: %d",
+		"Статистика последних боёв:\n\nВсего боёв: %d\nПобед: %d\nПоражений: %d\nПроцент побед: %.2f\nИзменение кубков: %d",
 		wins+losses,
 		wins,
 		losses,
@@ -162,7 +155,7 @@ func (b *Bot) handleBattleLog(msg *tgbotapi.Message, tag string) {
 
 func (b *Bot) handleCardStats(msg *tgbotapi.Message, tag string) {
 	if tag == "" {
-		b.reply(msg.Chat.ID, "тег бро")
+		b.reply(msg.Chat.ID, "Пожалуйста, введите тег игрока.")
 		return
 	}
 
@@ -173,7 +166,7 @@ func (b *Bot) handleCardStats(msg *tgbotapi.Message, tag string) {
 	}
 
 	text := fmt.Sprintf(
-		"Худший противник: %s(WR:%f)\nЧасто встречается: %s(WR:%f)",
+		"Анализ карт за последние бои:\n\nХудший противник: %s (WR:%.2f)\nЧасто встречается: %s (WR:%.2f)",
 		cardsStat.WorstCard.Card.Name,
 		cardsStat.WorstCard.Winrate*100,
 		cardsStat.FrequentCard.Card.Name,
@@ -192,5 +185,5 @@ func (b *Bot) handleCardStats(msg *tgbotapi.Message, tag string) {
 }
 
 func (b *Bot) handleUnknown(msg *tgbotapi.Message) {
-	b.reply(msg.Chat.ID, "Иди нахуй")
+	b.reply(msg.Chat.ID, "Неизвестная команда!")
 }
