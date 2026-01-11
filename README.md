@@ -40,10 +40,15 @@ Clashroyale - стратегическая игра с миллионами ак
 
 База данных выдержит нефункциональные требования потому что используется исключительно для хранения информации о пользователе, редко обновляется.
 Бот реализует протокол Telegram Bot API. Время отклика - порядка 2 мс.
-**Архитектура системы:**
-<img width="223" height="473" alt="image" src="https://github.com/user-attachments/assets/00c1573b-f7db-4eda-ad61-d9274280fb7a" />
-<img width="551" height="461" alt="Диаграмма без названия drawio (2)" src="https://github.com/user-attachments/assets/67fc7027-0548-4ca9-b7e6-79b1945f9566" />
-<img width="544" height="390" alt="2lvl" src="https://github.com/user-attachments/assets/38e6ec34-470b-47a5-a009-4a63671635a1" />
+
+---
+
+![Структура БД](https://github.com/user-attachments/assets/00c1573b-f7db-4eda-ad61-d9274280fb7a)
+<center><em>Рисунок 1: Структура базы данных</em></center>
+![Диаграмма контекста](https://github.com/user-attachments/assets/67fc7027-0548-4ca9-b7e6-79b1945f9566)
+<center><em>Рисунок 2: Диаграмма контекста</em></center>
+![Диаграмма контейнеров](https://github.com/user-attachments/assets/38e6ec34-470b-47a5-a009-4a63671635a1)
+<center><em>Рисунок 3: Диаграмма контейнеров</em></center>
 
 **Масштабирование при увеличении количества пользователей в 10 раз:**
 
