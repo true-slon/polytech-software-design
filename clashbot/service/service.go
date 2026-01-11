@@ -3,21 +3,21 @@ package service
 import "clashbot/cr"
 
 type Service struct {
-	cr *cr.Client
+	Cr *cr.Client
 }
 
 func NewService(client *cr.Client) *Service {
-	return &Service{cr: client}
+	return &Service{Cr: client}
 }
 
 func (s *Service) GetPlayer(tag string) (*cr.Player, error) {
-	return s.cr.GetPlayer(tag)
+	return s.Cr.GetPlayer(tag)
 }
 
 func (s *Service) GetClan(tag string) (*cr.Clan, error) {
-	return s.cr.GetClan(tag)
+	return s.Cr.GetClan(tag)
 }
 
 func (s *Service) GetBattleLog(tag string) (*cr.BattleList, error) {
-	return s.cr.GetBattleLog(tag)
+	return s.Cr.GetBattleLog(tag)
 }
