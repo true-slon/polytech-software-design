@@ -2,7 +2,6 @@ package tg
 
 import (
 	"fmt"
-	"strconv"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
@@ -38,6 +37,42 @@ func (b *Bot) handlePlayer(msg *tgbotapi.Message) {
 	)
 
 	b.reply(msg.Chat.ID, text)
+
+	imageUrl := player.CurrentFavouriteCard.IconUrls.Medium
+	photoMsg := tgbotapi.NewPhoto(msg.Chat.ID, tgbotapi.FileURL(imageUrl))
+	if _, err := b.api.Send(photoMsg); err != nil {
+		b.reply(msg.Chat.ID, err.Error())
+		return
+	}
+
+	var cardNames []string
+	for _, card := range player.CurrentDeck {
+		cardNames = append(cardNames, card.Name)
+	}
+
+	deckText := "Текущая колода:\n" + fmt.Sprintf("%s", cardNames)
+	b.reply(msg.Chat.ID, deckText)
+
+	// var urls []string
+	// for _, card := range player.CurrentDeck {
+	// 	urls = append(urls, card.IconUrls.Medium)
+	// }
+
+	// collage, err := image.BuildDeckCollage(urls)
+	// if err != nil {
+	// 	b.reply(msg.Chat.ID, err.Error())
+	// 	return
+	// }
+
+	// photo := tgbotapi.NewPhoto(
+	// 	msg.Chat.ID,
+	// 	tgbotapi.FileBytes{
+	// 		Name:  "deck.jpg",
+	// 		Bytes: collage.Bytes(),
+	// 	},
+	// )
+
+	// b.api.Send(photo)
 }
 
 func (b *Bot) handleClan(msg *tgbotapi.Message) {
@@ -79,11 +114,36 @@ func (b *Bot) handleBattleLog(msg *tgbotapi.Message) {
 		return
 	}
 
+	wins := 0
+	losses := 0
+	for _, battle := range *battleLog {
+		if battle.Team[0].TrophyChange > 0 {
+			wins++
+		} else {
+			losses++
+		}
+	}
+
+	if wins+losses == 0 {
+		b.reply(msg.Chat.ID, "Слишком мало боёв для анализа!")
+		return
+	}
+
 	trophiesChange := 0
 	for _, battle := range *battleLog {
 		trophiesChange += battle.Team[0].TrophyChange
 	}
-	b.reply(msg.Chat.ID, "Бро... "+strconv.Itoa(trophiesChange))
+
+	text := fmt.Sprintf(
+		"Всего боёв: %d\nПобед: %d\nПоражений: %d\nПроцент побед: %f\nИзменение кубков: %d",
+		wins+losses,
+		wins,
+		losses,
+		float64(wins)/float64(wins+losses)*100,
+		trophiesChange,
+	)
+
+	b.reply(msg.Chat.ID, text)
 }
 
 func (b *Bot) handleCardStats(msg *tgbotapi.Message) {
@@ -108,6 +168,14 @@ func (b *Bot) handleCardStats(msg *tgbotapi.Message) {
 	)
 
 	b.reply(msg.Chat.ID, text)
+
+	imageUrl := cardsStat.WorstCard.Card.IconUrls.Medium
+	photoMsg := tgbotapi.NewPhoto(msg.Chat.ID, tgbotapi.FileURL(imageUrl))
+	if _, err := b.api.Send(photoMsg); err != nil {
+		b.reply(msg.Chat.ID, err.Error())
+		return
+	}
+
 }
 
 func (b *Bot) handleUnknown(msg *tgbotapi.Message) {

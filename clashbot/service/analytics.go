@@ -28,7 +28,7 @@ func (s *Service) GetCardStats(tag string) (*RecentCards, error) {
 	}
 
 	if len(cardLosses) == 0 && len(cardWins) == 0 {
-		return nil, errors.New("недостаточно данных")
+		return nil, errors.New("Недостаточно данных для анализа!\nНе найдено боёв за последнее время.")
 	}
 
 	var rc RecentCards
