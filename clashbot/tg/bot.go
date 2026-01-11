@@ -10,10 +10,11 @@ import (
 )
 
 type Bot struct {
-	api      *tgbotapi.BotAPI
-	service  *service.Service
-	db       *sql.DB
-	handlers map[string]func(*tgbotapi.Message)
+	api         *tgbotapi.BotAPI
+	service     *service.Service
+	db          *sql.DB
+	handlers    map[string]func(*tgbotapi.Message)
+	awaitingTag map[int64]bool
 }
 
 func NewBot(token string, service *service.Service, db *sql.DB) *Bot {
@@ -22,10 +23,25 @@ func NewBot(token string, service *service.Service, db *sql.DB) *Bot {
 		log.Fatal(err)
 	}
 
-	return &Bot{
-		api:     api,
-		service: service,
-		db:      db,
+	bot := &Bot{
+		api:         api,
+		service:     service,
+		db:          db,
+		awaitingTag: make(map[int64]bool),
+	}
+
+	bot.initHandlers()
+	return bot
+}
+
+func (b *Bot) initHandlers() {
+	b.handlers = map[string]func(*tgbotapi.Message){
+		"start":     b.handleStart,
+		"player":    b.handlePlayer,
+		"clan":      b.handleClan,
+		"battlelog": b.handleBattleLog,
+		"cardstat":  b.handleCardStats,
+		"settag":    b.handleSetTag,
 	}
 }
 
@@ -34,9 +50,6 @@ func (b *Bot) Run() error {
 	u.Timeout = 60
 
 	updates := b.api.GetUpdatesChan(u)
-
-	handlers := b.initHandlers()
-
 	b.api.Debug = true
 
 	for update := range updates {
@@ -44,9 +57,14 @@ func (b *Bot) Run() error {
 			continue
 		}
 
+		if b.awaitingTag[update.Message.Chat.ID] {
+			b.processTagInput(update.Message)
+			continue
+		}
+
 		cmd := update.Message.Command()
 
-		if h, ok := handlers[cmd]; ok {
+		if h, ok := b.handlers[cmd]; ok {
 			h(update.Message)
 		} else {
 			b.handleUnknown(update.Message)
