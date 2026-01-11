@@ -11,12 +11,28 @@ func (b *Bot) reply(chatID int64, text string) {
 	b.api.Send(msg)
 }
 
+func (b *Bot) sendMainMenu(chatID int64) {
+	keyboard := tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("👤 Player", "player"),
+			tgbotapi.NewInlineKeyboardButtonData("🏰 Clan", "clan"),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("⚔ Battle log", "battlelog"),
+			tgbotapi.NewInlineKeyboardButtonData("🃏 Card stats", "cardstat"),
+		),
+	)
+
+	msg := tgbotapi.NewMessage(chatID, "Выбери команду:")
+	msg.ReplyMarkup = keyboard
+	b.api.Send(msg)
+}
+
 func (b *Bot) handleStart(msg *tgbotapi.Message) {
 	b.reply(msg.Chat.ID, "Пиши\n/player #TAG\n/clan #TAG\nзаебал")
 }
 
-func (b *Bot) handlePlayer(msg *tgbotapi.Message) {
-	tag := msg.CommandArguments()
+func (b *Bot) handlePlayer(msg *tgbotapi.Message, tag string) {
 	if tag == "" {
 		b.reply(msg.Chat.ID, "тег бро")
 		return
@@ -75,8 +91,7 @@ func (b *Bot) handlePlayer(msg *tgbotapi.Message) {
 	// b.api.Send(photo)
 }
 
-func (b *Bot) handleClan(msg *tgbotapi.Message) {
-	tag := msg.CommandArguments()
+func (b *Bot) handleClan(msg *tgbotapi.Message, tag string) {
 	if tag == "" {
 		b.reply(msg.Chat.ID, "тег бро")
 		return
@@ -101,8 +116,7 @@ func (b *Bot) handleClan(msg *tgbotapi.Message) {
 	b.reply(msg.Chat.ID, text)
 }
 
-func (b *Bot) handleBattleLog(msg *tgbotapi.Message) {
-	tag := msg.CommandArguments()
+func (b *Bot) handleBattleLog(msg *tgbotapi.Message, tag string) {
 	if tag == "" {
 		b.reply(msg.Chat.ID, "тег бро")
 		return
@@ -146,8 +160,7 @@ func (b *Bot) handleBattleLog(msg *tgbotapi.Message) {
 	b.reply(msg.Chat.ID, text)
 }
 
-func (b *Bot) handleCardStats(msg *tgbotapi.Message) {
-	tag := msg.CommandArguments()
+func (b *Bot) handleCardStats(msg *tgbotapi.Message, tag string) {
 	if tag == "" {
 		b.reply(msg.Chat.ID, "тег бро")
 		return

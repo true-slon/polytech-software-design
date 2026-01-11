@@ -3,6 +3,7 @@ package tg
 import (
 	"log"
 	"net/http"
+	"strings"
 
 	"clashbot/service"
 
@@ -12,7 +13,9 @@ import (
 type Bot struct {
 	api      *tgbotapi.BotAPI
 	service  *service.Service
-	handlers map[string]func(*tgbotapi.Message)
+	handlers map[string]func(*tgbotapi.Message, string)
+
+	waiting map[int64]string
 }
 
 func NewBot(token string, service *service.Service) *Bot {
@@ -24,6 +27,7 @@ func NewBot(token string, service *service.Service) *Bot {
 	return &Bot{
 		api:     api,
 		service: service,
+		waiting: make(map[int64]string),
 	}
 }
 
@@ -62,25 +66,44 @@ func (b *Bot) Run(url string, port string) error {
 	}
 
 	for update := range updates {
+
+		if update.CallbackQuery != nil {
+			chatID := update.CallbackQuery.Message.Chat.ID
+			cmd := update.CallbackQuery.Data
+
+			b.waiting[chatID] = cmd
+
+			b.api.Send(tgbotapi.NewMessage(chatID, "Введи тег игрока / клана:"))
+
+			b.api.Request(tgbotapi.NewCallback(update.CallbackQuery.ID, ""))
+			continue
+		}
+
 		if update.Message == nil {
 			continue
 		}
 
-		cmd := update.Message.Command()
+		chatID := update.Message.Chat.ID
 
-		if h, ok := b.handlers[cmd]; ok {
-			h(update.Message)
-		} else {
-			b.handleUnknown(update.Message)
+		if cmd, ok := b.waiting[chatID]; ok {
+			delete(b.waiting, chatID)
+
+			tag := strings.TrimSpace(update.Message.Text)
+
+			if h, ok := b.handlers[cmd]; ok {
+				h(update.Message, tag)
+			}
+			continue
 		}
+
+		b.sendMainMenu(chatID)
 	}
 
 	return nil
 }
 
 func (b *Bot) initHandlers() {
-	b.handlers = map[string]func(*tgbotapi.Message){
-		"start":     b.handleStart,
+	b.handlers = map[string]func(*tgbotapi.Message, string){
 		"player":    b.handlePlayer,
 		"clan":      b.handleClan,
 		"battlelog": b.handleBattleLog,
