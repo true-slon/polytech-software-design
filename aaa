@@ -1,0 +1,57 @@
+stages:
+  - build
+  - test
+  - dockerize
+build:
+  stage: build
+  image: golang:1.19-alpine
+  script:
+    - mkdir build
+    - go build -o build/app .
+  artifacts:
+    paths:
+      - build/app
+
+unit_test:
+  stage: test
+  needs:
+    - build
+  script:
+    - "echo 'STUB. unit-tests SUCCESS' > ./unit_tests_results.log"
+  artifacts:
+    paths:
+      - ./unit_tests_results.log
+
+lint_test:
+  stage: test
+  needs:
+    - build
+  script:
+    - "echo 'STUB. lint-tests SUCCESS' > ./linter_results.log"
+  artifacts:
+    paths:
+      - ./linter_results.log
+
+
+dockerize:
+  stage: dockerize
+  variables:
+    DOCKER_BUILDKIT: 1
+    EXTERNAL_REGISTRY_ADDRESS: 192.168.99.100:5050
+  script: |
+    export SERVICE_VERSION=$(grep 'version' ./version.json | cut -d '"' -f4 | tr '\n' '\0')
+    echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER $EXTERNAL_REGISTRY_ADDRESS --password-stdin
+
+    echo "CI_REGISTRY_IMAGE=$CI_REGISTRY_IMAGE"
+    echo "SERVICE_VERSION=$SERVICE_VERSION"
+
+    echo "COPY ARTIFACT TO DOCKER"
+    docker build --provenance=false \
+                 -f Dockerfile \
+                 -t $EXTERNAL_REGISTRY_ADDRESS/$CI_PROJECT_PATH:latest \
+                 -t $EXTERNAL_REGISTRY_ADDRESS/$CI_PROJECT_PATH:$SERVICE_VERSION \
+                 -t $CI_REGISTRY_IMAGE:$SERVICE_VERSION \
+                 .
+
+    docker push $EXTERNAL_REGISTRY_ADDRESS/$CI_PROJECT_PATH:$SERVICE_VERSION
+    docker push $EXTERNAL_REGISTRY_ADDRESS/$CI_PROJECT_PATH:latest
